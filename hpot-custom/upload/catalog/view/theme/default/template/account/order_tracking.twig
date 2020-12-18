@@ -1,0 +1,325 @@
+{{ header }}
+<style type="text/css">
+
+    .shipment-status .li.complete .status {
+        border-top: 2px solid {{ module_hp_tracking_color_scheme }} !important;
+    }
+
+    .shipment-status .item.active > span {
+        background: {{ module_hp_tracking_color_scheme }} !important;
+    }
+
+    .shipment-status .li.complete .status span {
+        background-color: {{ module_hp_tracking_color_scheme }} !important;
+        border: none;
+        transition: all 200ms ease-in;
+    }
+
+    .hpot-phone-view-complete {
+        background-color: {{ module_hp_tracking_color_scheme }} !important;
+        padding: 10px;
+        border-radius: 50%;
+        color: white;
+    }
+
+</style>
+<link href="catalog/view/javascript/shipment-tracking.css" rel="stylesheet"/>
+<div class="container">
+	<ul class="breadcrumb">
+		{% for breadcrumb in breadcrumbs %}
+			<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+	</ul>
+	<div class="row">{{ column_left }}
+		{% if column_left and column_right %}
+			{% set class = 'col-sm-6' %}
+		{% elseif column_left or column_right %}
+			{% set class = 'col-sm-9' %}
+		{% else %}
+			{% set class = 'col-sm-12' %}
+		{% endif %}
+		<div id="content" class="{{ class }} order-tracking">{{ content_top }}
+			<h1>{{ heading_title }}</h1>
+
+			<!-- ZAKI HPWD -->
+			<div class="col-sm-6 hpot_border_box panel panel-default">
+				<div class="panel-body">
+					<form action="{{ action }}" method="post" enctype="multipart/form-data" class="form-horizontal">
+						<div class="form-group required">
+							<label class="col-sm-12" for="input_invoice_no">* {{ entry_invoice_no }}</label>
+							<div class="col-sm-12">
+								<input type="text" maxlength="10" name="invoice_no" id="invoice_no"
+								       value="{{ invoice_no }}" id="input_invoice_no" class="form-control"/>
+
+							</div>
+
+							<div class="col-sm-12">
+								{% if error_invoice_no %}
+									<span class="text-danger">{{ error_invoice_no }}</span>
+								{% endif %}
+							</div>
+
+						</div>
+
+						<div class="form-group required">
+							<label class="col-sm-12" for="input_email">* {{ entry_email }}</label>
+							<div class="col-sm-12">
+								<input type="text" name="email" id="email" maxlength="40" value="{{ email }}" id="email"
+								       class="form-control"/>
+
+							</div>
+
+							<div class="col-sm-12">
+								{% if error_email %}
+									<span class="text-danger">{{ error_email }}</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="col-sm-12">
+							</div>
+							<div class="col-sm-12">
+								{% if error_fake_invoice %}
+									<span class="text-danger">{{ error_fake_invoice }}</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="col-sm-12">
+								<input type="submit" name="submit" class="btn btn-primary" id="cek-ongkir"
+								       value="{{ button_send }}"/>
+							</div>
+						</div>
+
+
+					</form>
+				</div>
+			</div>
+
+
+			<!-- ZAKi HPWD -->
+			<div class="col-sm-5 col-sm-offset-1 hpot_border_box panel panel-default">
+				<div class="panel-body">
+					{{ text_instruction }}
+				</div>
+			</div>
+
+
+			{% if order_info %}
+
+				{% if tabel_konfirmasi %}
+					{% if order_info.tgl_konfirm %}
+						<table class="table table-bordered table-hover confirm-payment">
+							<thead>
+							<tr>
+								<td class="left">{{ column_status_konfirmasi }}</td>
+							</tr>
+							</thead>
+							<tr>
+								<td>{{ text_date_confirm }} <b>{{ date_confirm }} </b></td>
+							</tr>
+						</table>
+					{% else %}
+						<table class="table table-bordered table-hover confirm-payment">
+							<thead>
+							<tr>
+								<td class="left">{{ column_status_konfirmasi }}</td>
+							</tr>
+							</thead>
+							<tr>
+								<td><span class="text-danger">{{ text_unconfirmed }}</span></td>
+							</tr>
+						</table>
+					{% endif %}
+				{% endif %}
+
+
+				{% if no_receipt %}
+					<table class="table table-bordered table-hover">
+						<thead>
+						<tr>
+							<td class="left">{{ column_resi_pengiriman }}</td>
+						</tr>
+						</thead>
+						<tr>
+							<td><b>{{ text_resi_pengiriman }} : </b> {{ no_receipt }} </td>
+						</tr>
+					</table>
+				{% endif %}
+
+
+				<table class="table table-bordered table-hover">
+					<thead>
+					<tr>
+						<td class="left" colspan="2">{{ text_order_detail }}</td>
+					</tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td class="left" style="width: 50%;">
+							{% if invoice_no %}
+								<b>{{ text_invoice_no }}</b> {{ invoice_no }}<br/>
+							{% endif %}
+							<b>{{ text_date_added }}</b> {{ date_added }}</td>
+						<td class="left" style="width: 50%;">
+							{% if payment_method %}
+								<b>{{ text_payment_method }}</b> {{ payment_method }} <br/>
+							{% endif %}
+
+							{% if shipping_method %}
+								<b>{{ text_shipping_method }}</b> {{ shipping_method }}
+							{% endif %}</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<!-- hpwd -->
+				{% if order_status_queue %}
+					<div class="col-xs-12 col-sm-12 hidden-md hidden-lg shipment-status-mobile">
+						<center style="display:block;">
+							{% for order_status in order_status_queue %}
+								{% if order_status.sort_order <= current_order_status %}
+									<span class="hpot-phone-view-complete" data-toggle="tooltip" data-placement="top"
+									      title="{{ order_status.name }}"><i
+												class="fa {{ order_status.icon }}"></i></span>
+								{% else %}
+									<span class="hpot-phone-view" data-toggle="tooltip" data-placement="top"
+									      title="{{ order_status.name }}"><i
+												class="fa {{ order_status.icon }}"></i></span>
+								{% endif %}
+							{% endfor %}
+						</center>
+					</div>
+					<div class="clearfix"></div>
+					<div class="shipment-status">
+						<!-- START UL -->
+						<ul class="timeline hidden-sm hidden-xs" id="timeline"
+						    style="width: inherit;padding-left: 0px;">
+							{% for order_status in order_status_queue %}
+								<li class="li {{ order_status.sort_order <= current_order_status ? 'complete' : '' }}">
+									<div class="timestamp">
+									</div>
+									<div class="status" data-toggle="tooltip" data-placement="top"
+									     title="{{ order_status.name }}">
+										<span><i class="fa {{ order_status.icon }}"></i></span>
+										<h4>{{ order_status.name }}</h4>
+									</div>
+									{# <div class="date">{{ order_status.date }}</div> #}
+								</li>
+							{% endfor %}
+						</ul>
+						<!-- END UL -->
+						<div class="manifest">
+							<div class="manifest-border"></div>
+							<div class="manifest-header">
+								<div class="col-sm-3">
+									<h3>{{ text_shipping }}</h3>
+								</div>
+								<div class="col-sm-9">
+									{% if shipment_profile %}
+										<span class="hidden-md hidden-lg">{{ shipment_profile.courier_name }} {{ shipment_profile.service_code }} | {{ text_shipping_number }}. {{ shipment_profile.waybill_number }}</span>
+										<span class="pull-right hidden-xs hidden-sm">{{ shipment_profile.courier_name }} {{ shipment_profile.service_code }} | {{ text_shipping_number }}. {{ shipment_profile.waybill_number }}</span>
+									{% endif %}
+								</div>
+							</div>
+
+							<div id="manifest-table" class="hidden-md hidden-lg">
+								<div class='row'>
+									<div class='col-sm-12 col-xs-12'>
+										<b>{{ shipment_profile.receiver_name }}</b>
+										<br>
+										{{ shipment_profile.receiver_address1 }}
+										<br>
+										{{ shipment_profile.receiver_address2 }}
+										<br>
+										{{ shipment_profile.receiver_address3 }}
+										<br>
+										{{ shipment_profile.destination }}
+									</div>
+									<div class='col-sm-12 col-xs-12'>
+										{# {% set i = 0 %} #}
+										{# {% for manifest, item in shipment_manifest %} #}
+										{# {% set opacity = (i == 0) ? "1" : "0.7" %} #}
+										{# <div class="item {{ i == 0 ? 'active' : '' }}"> #}
+										{# <span class="glyphicon glyphicon-ok"></span> #}
+										{# <div style="opacity: {{ opacity }};">{{ item.manifest_date}} {{ item.manifest_time }} {{ item.manifest_description }}</div> #}
+										{# </div> #}
+										{# {% set i = i + 1 %} #}
+										{# {% endfor %} #}
+										{% for order_history in order_histories %}
+											<div class="item active">
+												<span class="glyphicon glyphicon-ok"></span>
+												<div style="opacity: 1;"><span
+															style="font-size: 16px;color: black;font-weight: bold;">{{ order_history.name }} - {{ order_history.date_added }}</span><br>{{ order_history.comment }}
+												</div>
+											</div>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+
+							<table id="manifest-table" class="table hidden-xs hidden-sm">
+								<tr>
+									<td>
+										<b>{{ shipment_profile.receiver_name }}</b>
+										<br>
+										{{ shipment_profile.receiver_address1 }}
+										<br>
+										{{ shipment_profile.receiver_address2 }}
+										<br>
+										{{ shipment_profile.receiver_address3 }}
+										<br>
+										{{ shipment_profile.destination }}
+									</td>
+									<td>
+										{# {% set i = 0 %} #}
+										{# {% for manifest, item in shipment_manifest %} #}
+										{# {% set opacity = (i == 0) ? "1" : "0.7" %} #}
+										{# <div class="item {{ i == 0 ? 'active' : '' }}"> #}
+										{# <span class="glyphicon glyphicon-ok"></span> #}
+										{# <div style="opacity: {{ opacity }};">{{ item.manifest_date}} {{ item.manifest_time }} {{ item.manifest_description }}</div> #}
+										{# </div> #}
+										{# {% set i = i + 1 %} #}
+										{# {% endfor %} #}
+										{% for order_history in order_histories %}
+											<div class="item active">
+												<span class="glyphicon glyphicon-ok"></span>
+												<div style="opacity: 1;"><span
+															style="font-size: 16px;color: black;font-weight: bold;">{{ order_history.name }} - {{ order_history.date_added }}</span><br>{{ order_history.comment }}
+												</div>
+											</div>
+										{% endfor %}
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				{% endif %}
+				<!-- end hpwd -->
+				<table class="table table-bordered table-hover">
+					<thead>
+					<tr>
+						<td class="left">{{ text_payment_address }}</td>
+						{% if shipping_address %}
+							<td class="left">{{ text_shipping_address }}</td>
+						{% endif %}
+					</tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td class="left">{{ payment_address }}</td>
+						{% if shipping_address %}
+							<td class="left">{{ shipping_address }}</td>
+						{% endif %}
+					</tr>
+					</tbody>
+				</table>
+
+			{% endif %}
+
+			{{ content_bottom }}</div>
+		{{ column_right }}</div>
+</div>
+{{ footer }}
